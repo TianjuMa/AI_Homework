@@ -122,9 +122,6 @@ class Player:
                 score = s
         return score
 
-    # The default player defines a very simple score function
-    # You will write the score function in the MancalaPlayer below
-    # to improve on this function.
     def score(self, board):
         """ Returns the score for this player given the state of the board """
         if board.hasWon(self.num):
@@ -134,19 +131,13 @@ class Player:
         else:
             return 50.0
 
-    # You should not modify anything before this point.
-    # The code you will add to this file appears below this line.
-
-    # You will write this function (and any helpers you need)
-    # You should write the function here in its simplest form:
-    #   1. Use ply to determine when to stop (when ply == 0)
-    #   2. Search the moves in the order they are returned from the board's
-    #       legalMoves function.
-    # However, for your custom player, you may copy this function
-    # and modify it so that it uses a different termination condition
-    # and/or a different move search order.
     def alphaBetaMove(self, board, ply):
         """ Choose a move with alpha beta pruning.  Returns (score, move) """
+        """
+        The code is from the pseudocode in WikiPedia.
+        Link: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning>
+
+        """
         move = -1
         score = -INFINITY
         turn = self
@@ -167,7 +158,9 @@ class Player:
                 move = m
                 score = s
         return score, move
-
+        """
+        The next two functions(abMin and abMax) are helper function of Alpha-Beta Move.
+        """
     def abMin(self, board, ply, turn, alpha, beta):
         if board.gameOver():
             return turn.score(board)
@@ -214,24 +207,31 @@ class Player:
         return score
 
     def myMove(self, board):
+        """
+        Idea:
+        1. When there is an empty slot(index X) which can be filled by the last stone in another slot(index Y).
+           Then we move the slow in index Y.
+        2. When there is no empty slot or no empty slot can be filled by the last stone in another slot,
+           Then we move the slot with most stones.
+        """
         move = -1
         cup1 = board.getPlayersCups(self.num)
         found = false
         maxStones = 0
         maxIndex = 0
         for index in board.legalMoves(self):
-            if cup1[index - 1] > maxStones:
+            if cup1[index - 1] > maxStones: #to get the maximum stones in all slots
                 maxIndex = index
                 maxStones = cup1[index - 1]
-
+            #to check if there is an empty slot which can be filled by the last stone in anthoer slot.
             if cup1[index - 1] + index <= 6 and cup1[cup1[index - 1] + index - 1] == 0:
                 found = true
                 move = index
                 break
-
+        #if there doesn't exist such an empty slot, then move the slot with most stones.
         if not found:
             move = maxIndex
-
+        #Otherwise, we move the index Y slot.
         nb = deepcopy(board)
         nb.makeMove(self, move)
         score = self.score(nb)
@@ -259,7 +259,6 @@ class Player:
             print ("chose move", move, " with value", val)
             return move
         elif self.type == self.CUSTOM:
-            # TODO: Implement a custom player
             val, move = self.myMove(board)
             # You should fill this in with a call to your best move choosing
             # function.  You may use whatever search algorithm and scoring
@@ -272,29 +271,30 @@ class Player:
             return -1
 
 
-# TODO: part 1
-# Note, you should change the name of this player to be your netid
+
 class tml5872(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
     def score(self, board):
         """
-
+        The idea is to add up the score in cup and the maximum possible value that can be earned in potential next step.
+        We calculate all the possible next steps and their score that can be earned.
+        Get the maximum score and add up with the score in cups.
         """
 
         if board.hasWon(self.num):
-            return 100.0
+            return 100.0 #Keep the original idea
         elif board.hasWon(self.opp):
-            return 0.0
+            return 0.0 #Keep the original idea
         else:
             cup1 = board.getPlayersCups(self.num)
             cup2 = board.getPlayersCups(self.opp)
 
             maxPossibleScore = 1
-
+            #calculate all the possible next steps and their scores.
             for index, val in enumerate(cup1):
                 if index + val < len(cup1) and cup1[index + val] == 0:
                     maxPossibleScore = max(maxPossibleScore, cup2[index + val] + 1)
-
+            #return the sum of original score in cups and maximum value that can be earned in next step.
             return board.scoreCups[self.num - 1] + maxPossibleScore

@@ -202,5 +202,5 @@ def startGame(p1, p2):
 
 
 player1 = tml5872(1, Player.HUMAN)
-player2 = tml5872(2, Player.MINIMAX)
+player2 = tml5872(2, Player.ABPRUNE)
 startGame(player1, player2)

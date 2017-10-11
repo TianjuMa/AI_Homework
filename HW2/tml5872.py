@@ -10,12 +10,25 @@
 
 
 from random import *
-# from decimal import *
 from copy import *
 
 from sympy import false, true
 
 from MancalaBoard import *
+
+"""
+Team Members:
+
+Menglei Lei (mlj3199)
+
+Tianju Ma (tml5872)
+
+All group members were present and contributing during all work on this project.
+
+"""
+
+
+
 
 # a constant
 INFINITY = 1.0e400
@@ -266,10 +279,10 @@ class tml5872(Player):
         intelligently """
 
     def score(self, board):
-        """ Evaluate the Mancala board for this player """
-        # Currently this function just calls Player's score
-        # function.  You should replace the line below with your own code
-        # for evaluating the board
+        """
+
+        """
+
         if board.hasWon(self.num):
             return 100.0
         elif board.hasWon(self.opp):

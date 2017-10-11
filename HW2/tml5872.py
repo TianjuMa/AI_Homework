@@ -27,9 +27,6 @@ All group members were present and contributing during all work on this project.
 
 """
 
-
-
-
 # a constant
 INFINITY = 1.0e400
 
@@ -134,17 +131,6 @@ class Player:
         else:
             return 50.0
 
-    # You should not modify anything before this point.
-    # The code you will add to this file appears below this line.
-
-    # You will write this function (and any helpers you need)
-    # You should write the function here in its simplest form:
-    #   1. Use ply to determine when to stop (when ply == 0)
-    #   2. Search the moves in the order they are returned from the board's
-    #       legalMoves function.
-    # However, for your custom player, you may copy this function
-    # and modify it so that it uses a different termination condition
-    # and/or a different move search order.
     def alphaBetaMove(self, board, ply):
         """ Choose a move with alpha beta pruning.  Returns (score, move) """
         move = -1
@@ -259,7 +245,6 @@ class Player:
             print ("chose move", move, " with value", val)
             return move
         elif self.type == self.CUSTOM:
-            # TODO: Implement a custom player
             val, move = self.myMove(board)
             # You should fill this in with a call to your best move choosing
             # function.  You may use whatever search algorithm and scoring
@@ -272,7 +257,6 @@ class Player:
             return -1
 
 
-# TODO: part 1
 # Note, you should change the name of this player to be your netid
 class tml5872(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard

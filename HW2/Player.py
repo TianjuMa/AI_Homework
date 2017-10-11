@@ -156,12 +156,13 @@ class Player:
         return score, move
 
     def abMin(self, board, ply, turn, alpha, beta):
-        if board.gameOver() or ply == 0:
+        if board.gameOver():
             return turn.score(board)
 
         score = INFINITY
         for m in board.legalMoves(self):
-
+            if ply == 0:
+                return turn.score(board)
             opp = Player(self.opp, self.type, self.ply)
             nb = deepcopy(board)
             nb.makeMove(self, m)
@@ -177,13 +178,13 @@ class Player:
         return score
 
     def abMax(self, board, ply, turn, alpha, beta):
-        if board.gameOver() or ply == 0:
-            return turn.score(board)  # Can't make a move, the game is over
+        if board.gameOver():
+            return turn.score(board)
 
         score = -INFINITY
         for m in board.legalMoves(self):
-            # for each legal move
-
+            if ply == 0:
+                return turn.score(board)
             nb = deepcopy(board)
             nb.makeMove(self, m)
 

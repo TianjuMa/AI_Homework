@@ -1,7 +1,7 @@
 from Tkinter import *
 
 from MancalaBoard import *
-from Player import *
+from tml5872 import *
 
 
 class MancalaWindow:

@@ -119,9 +119,6 @@ class Player:
                 score = s
         return score
 
-    # The default player defines a very simple score function
-    # You will write the score function in the MancalaPlayer below
-    # to improve on this function.
     def score(self, board):
         """ Returns the score for this player given the state of the board """
         if board.hasWon(self.num):
@@ -133,6 +130,11 @@ class Player:
 
     def alphaBetaMove(self, board, ply):
         """ Choose a move with alpha beta pruning.  Returns (score, move) """
+        """
+        The code is from the pseudo code in Wikipedia.
+        Link: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning>
+
+        """
         move = -1
         score = -INFINITY
         turn = self
@@ -155,6 +157,10 @@ class Player:
         return score, move
 
     def abMin(self, board, ply, turn, alpha, beta):
+        """
+        The next two functions(abMin and abMax) are helper function of Alpha-Beta Move.
+
+        """
         if board.gameOver():
             return turn.score(board)
 
@@ -199,30 +205,76 @@ class Player:
 
         return score
 
-    def myMove(self, board):
+    def myMove(self, board, ply):
+        """
+        Idea:
+        just make some modification on the score() function, based on a-b pruning algorithm.
+        """
         move = -1
-        cup1 = board.getPlayersCups(self.num)
-        found = false
-        maxStones = 0
-        maxIndex = 0
-        for index in board.legalMoves(self):
-            if cup1[index - 1] > maxStones:
-                maxIndex = index
-                maxStones = cup1[index - 1]
+        score = -INFINITY
+        turn = self
+        alpha = -INFINITY
+        beta = INFINITY
+        for m in board.legalMoves(self):
 
-            if cup1[index - 1] + index <= 6 and cup1[cup1[index - 1] + index - 1] == 0:
-                found = true
-                move = index
+            if ply == 0 or board.gameOver():
+                return self.myScore(board), m
+
+            nb = deepcopy(board)
+            nb.makeMove(self, m)
+
+            opp = Player(self.opp, self.type, self.ply)
+
+            s = opp.myMin(nb, ply - 1, turn, alpha, beta)
+            if s > score:
+                move = m
+                score = s
+        return score, move
+
+    def myMin(self, board, ply, turn, alpha, beta):
+        if board.gameOver():
+            return turn.myScore(board)
+
+        score = INFINITY
+        for m in board.legalMoves(self):
+            if ply == 0:
+                return turn.myScore(board)
+            opp = Player(self.opp, self.type, self.ply)
+            nb = deepcopy(board)
+            nb.makeMove(self, m)
+
+            s = opp.myMax(nb, ply - 1, turn, alpha, beta)
+            if s < score:
+                score = s
+            if score < beta:
+                beta = score
+            if beta <= alpha:
                 break
 
-        if not found:
-            move = maxIndex
+        return score
 
-        nb = deepcopy(board)
-        nb.makeMove(self, move)
-        score = self.score(nb)
+    def myMax(self, board, ply, turn, alpha, beta):
+        if board.gameOver():
+            return turn.myScore(board)
 
-        return score, move
+        score = -INFINITY
+        for m in board.legalMoves(self):
+            if ply == 0:
+                return turn.myScore(board)
+            nb = deepcopy(board)
+            nb.makeMove(self, m)
+
+            opp = Player(self.opp, self.type, self.ply)
+            s = opp.myMax(nb, ply - 1, turn, alpha, beta)
+
+            if s > score:
+                score = s
+            if score > alpha:
+                alpha = score
+            if beta <= alpha:
+                break
+
+        return score
 
     def chooseMove(self, board):
         """ Returns the next move that this player wants to make """
@@ -245,7 +297,7 @@ class Player:
             print ("chose move", move, " with value", val)
             return move
         elif self.type == self.CUSTOM:
-            val, move = self.myMove(board)
+            val, move = self.myMove(board, self.ply)
             # You should fill this in with a call to your best move choosing
             # function.  You may use whatever search algorithm and scoring
             # algorithm you like.  Remember that your player must make
@@ -256,29 +308,44 @@ class Player:
             print ("Unknown player type")
             return -1
 
+    def myScore(self, board):
+        """
+        The idea is to add up the score in cup and the maximum possible value that can be earned in potential next step.
+        We calculate all the possible next steps and their score that can be earned.
+        Get the maximum score and add up with the score in cups.
+        """
+        if board.hasWon(self.num):
+            return 100.0  # Keep the original idea
+        elif board.hasWon(self.opp):
+            return 0.0  # Keep the original idea
+        else:
+            cup1 = board.getPlayersCups(self.num)
+            cup2 = board.getPlayersCups(self.opp)
 
-# Note, you should change the name of this player to be your netid
+            maxPossibleScore = 1
+            # calculate all the possible next steps and their scores.
+            for index, val in enumerate(cup1):
+                if index + val < len(cup1) and cup1[index + val] == 0:
+                    maxPossibleScore = max(maxPossibleScore, cup2[index + val] + 1)
+            # return the sum of original score in cups and maximum value that can be earned in next step.
+            return board.scoreCups[self.num - 1] + maxPossibleScore
+
+
 class tml5872(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
     def score(self, board):
         """
-
+        The idea is similar with the naive version: there are still three cases:
+        case1: I won, return 100 in this case;
+        case2: The opponent won, return 0 in this case;
+        case3: If nobody won, return the minimum score I should earn to be a winner.
         """
 
         if board.hasWon(self.num):
-            return 100.0
+            return 100.0   # Keep the original idea
         elif board.hasWon(self.opp):
-            return 0.0
+            return 0.0     # Keep the original idea
         else:
-            cup1 = board.getPlayersCups(self.num)
-            cup2 = board.getPlayersCups(self.opp)
-
-            maxPossibleScore = 1
-
-            for index, val in enumerate(cup1):
-                if index + val < len(cup1) and cup1[index + val] == 0:
-                    maxPossibleScore = max(maxPossibleScore, cup2[index + val] + 1)
-
-            return board.scoreCups[self.num - 1] + maxPossibleScore
+            return 25 - board.scoreCups[self.num - 1]

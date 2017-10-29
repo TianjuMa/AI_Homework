@@ -3,6 +3,8 @@ import copy
 import read
 
 
+original_KB = []
+
 class Statement(object):
     def __init__(self, pattern):
         self.full = pattern
@@ -137,7 +139,8 @@ class kb(object):
         for temp_f in self.facts:
             if temp_f.statement == statement.full:
                 visited.add(temp_f)
-                result_fact.append(temp_f)
+                if temp_f in original_KB:
+                    result_fact.append(temp_f)
                 self.dfs(result_facts, visited, result_fact, temp_f)
         return result_facts
 
@@ -209,6 +212,8 @@ if __name__ == "__main__":
 
     for rule in rules:
         kb1.kb_assert(rule)
+
+    original_KB = copy.deepcopy(kb1.facts)
 
     # print ('\n*******************************  Knowledge Base  *********************************\n')
     # for f in kb1.facts:
@@ -295,10 +300,3 @@ if __name__ == "__main__":
 
         # for f in kb1.facts:
         #     print (f.statement, "supported by", map(lambda x: printHelper(x), f.supported_by))
-
-
-# def printHelper(fac_ru):
-#     if type(fac_ru) == Fact:
-#         return fac_ru.statement
-#     else:
-#         return fac_ru.LHS, "=====>", fac_ru.RHS

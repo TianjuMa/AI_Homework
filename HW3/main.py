@@ -31,6 +31,9 @@ class Fact(object):
         self.facts_supported = []
         self.rules_supported = []
 
+    def __repr__(self):
+        return self.statement.__repr__()
+
 
 class Rule(object):
     count = 0
@@ -57,6 +60,9 @@ class Rule(object):
         self.facts_supported = []
         self.rules_supported = []
 
+    def __repr__(self):
+        return self.LHS.__repr__() + "====>" + self.RHS.__repr__()
+
 
 class kb(object):
     def __init__(self):
@@ -82,23 +88,30 @@ class kb(object):
             self.add_rule(Rule(statement))
 
     def kb_ask(self, statement):
-        list_of_bindings_lists = []
+        bindings = {}
         for cur_fact in self.facts:
             bindings = match(statement, cur_fact.statement)
-            if bindings and not (bindings in list_of_bindings_lists):
-                list_of_bindings_lists.append(bindings)
-        if len(list_of_bindings_lists) == 0:
+            if bindings:
+                break
+        if len(bindings) == 0:
             return 'No matching solutions \n'
-        return list_of_bindings_lists
+        return bindings
 
     def kb_ask_plus(self, statement_list):
         list_of_bindings_lists_result = []
+        all_match = set()
         for st in statement_list:
             for cur_fact in self.facts:
                 bindings = match(st, cur_fact.statement)
-                if bindings and not (bindings in list_of_bindings_lists_result):
-                    list_of_bindings_lists_result.append(bindings)
-
+                if bindings:
+                    for b in bindings.keys():
+                        if b in all_match:
+                            return False
+                        else:
+                            all_match.add(b)
+                    if len(bindings) != 0:
+                        list_of_bindings_lists_result.append(bindings)
+                        break
         return list_of_bindings_lists_result
 
     def kb_infer(self, cur_fact, cur_rule):
@@ -106,15 +119,15 @@ class kb(object):
         if bindings:
             if len(cur_rule.LHS) == 1:
                 new_fact = Fact(instantiate(cur_rule.RHS, bindings), supported_by=[cur_fact, cur_rule])
-                new_fact.facts_supported.append(cur_fact)
-                new_fact.rules_supported.append(cur_rule)
+                cur_fact.facts_supported.append(new_fact)
+                cur_rule.rules_supported.append(new_fact)
                 self.add_fact(new_fact)
             else:
                 lhs = map(lambda x: instantiate(x, bindings), cur_rule.LHS[1:])
                 rhs = instantiate(cur_rule.RHS, bindings)
                 new_rule = Rule(None, lhs, rhs, supported_by=[cur_fact, cur_rule])
-                new_rule.facts_supported.append(cur_fact)
-                new_rule.rules_supported.append(cur_rule)
+                cur_fact.facts_supported.append(new_rule)
+                cur_rule.rules_supported.append(new_rule)
                 self.add_rule(new_rule)
 
     def kb_why(self, statement):
@@ -123,19 +136,21 @@ class kb(object):
         result_fact = []
         for temp_f in self.facts:
             if temp_f.statement == statement.full:
+                visited.add(temp_f)
+                result_fact.append(temp_f)
                 self.dfs(result_facts, visited, result_fact, temp_f)
         return result_facts
 
     def dfs(self, result_facts, visited, result_fact, cur_fac_rule):
-        visited.add(cur_fac_rule)
-        result_fact.append(cur_fac_rule)
         for fac_rule in cur_fac_rule.supported_by:
             if fac_rule not in visited:
+                visited.add(fac_rule)
+                result_fact.append(fac_rule)
                 self.dfs(result_facts, visited, result_fact, fac_rule)
+                visited.remove(fac_rule)
+                result_fact.pop()
         if len(result_fact) != 0:
             result_facts.append(copy.deepcopy(result_fact))
-            result_fact.pop()
-        visited.remove(cur_fac_rule)
 
 
 def match(target, cur):
@@ -205,6 +220,16 @@ if __name__ == "__main__":
     #
     # print ('\n*******************************  Ask  *******************************************\n')
     # print (kb1.kb_ask(['isa', 'pyramid', '?x']))
+    #
+    # print ('\n*******************************  Ask+  *******************************************\n')
+    #
+    # ll = [['isa', 'cube', '?x'], ['isa', 'pyramid', '?y']]
+    # result = kb1.kb_ask_plus(ll)
+    # if result:
+    #     print (result)
+    # else:
+    #     print("No correct match !!!!!!!")
+
 
     # print ('\n*******************************  Match *******************************************\n')
     # print (match(['isa', 'pyramid', '?x'], ['isa', 'pyramid', 'block']))
@@ -242,10 +267,10 @@ if __name__ == "__main__":
     print ('\n*******************************  Knowledge Base After update *********************************\n')
     for f in kb1.facts:
         print (f.count, f.statement)
-
-    print ('\n*******************************  Rule Base After update **************************************\n')
-    for r in kb1.rules:
-        print(r.count, r.LHS, "====>", r.RHS)
+    #
+    # print ('\n*******************************  Rule Base After update **************************************\n')
+    # for r in kb1.rules:
+    #     print(r.count, r.LHS, "====>", r.RHS)
 
     print ('\n*******************************  Why **************************************\n')
 
@@ -258,8 +283,18 @@ if __name__ == "__main__":
             else:
                 print(fr.LHS, "====>", fr.RHS)
 
-    # for f in kb1.facts:
-    #     print (f.statement, "supported by", map(lambda x: printHelper(x), f.supported_by))
+    result = kb1.kb_why(Statement(['flat', 'sphere1']))
+
+    for l in result:
+        print(l)
+        # for fr in l:
+        #     if type(fr) == Fact:
+        #         print (fr.statement)
+        #     else:
+        #         print(fr.LHS, "====>", fr.RHS)
+
+        # for f in kb1.facts:
+        #     print (f.statement, "supported by", map(lambda x: printHelper(x), f.supported_by))
 
 
 # def printHelper(fac_ru):

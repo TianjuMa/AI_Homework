@@ -2,9 +2,10 @@ import copy
 
 import read
 
-
 original_KB = []
-#define Statement object for convenient use
+
+
+# define Statement object for convenient use
 class Statement(object):
     def __init__(self, pattern):
         self.full = pattern
@@ -13,7 +14,8 @@ class Statement(object):
         self.facts = []
         self.rules = []
 
-#define Fact object for convenient use
+
+# define Fact object for convenient use
 class Fact(object):
     count = 0
 
@@ -36,7 +38,8 @@ class Fact(object):
     def __repr__(self):
         return self.statement.__repr__()
 
-#define Rule object for convenient use
+
+# define Rule object for convenient use
 class Rule(object):
     count = 0
 
@@ -65,7 +68,8 @@ class Rule(object):
     def __repr__(self):
         return self.LHS.__repr__() + "====>" + self.RHS.__repr__()
 
-#define KB object for convenient use
+
+# define KB object for convenient use
 class kb(object):
     def __init__(self):
         self.facts = []
@@ -83,14 +87,14 @@ class kb(object):
     def rem_rule(self, cur_rule):
         self.rules.remove(cur_rule)
 
-    #Complete assert function which allows to add fact and rule into KB
+    # Complete assert function which allows to add fact and rule into KB
     def kb_assert(self, statement):
         if type(statement) == list:
             self.add_fact(Fact(statement))
         else:
             self.add_rule(Rule(statement))
 
-    #Complete Ask function to see if the statement is existing in KB
+    # Complete Ask function to see if the statement is existing in KB
     def kb_ask(self, statement):
         bindings = {}
         for cur_fact in self.facts:
@@ -101,8 +105,8 @@ class kb(object):
             return 'No matching solutions \n'
         return bindings
 
-    #Complete ask + function to see a list of statments is existing in KB
-    #if the bindings are not consistent, then throw exceptions
+    # Complete ask + function to see a list of statments is existing in KB
+    # if the bindings are not consistent, then throw exceptions
     def kb_ask_plus(self, statement_list):
         list_of_bindings_lists_result = []
         all_match = set()
@@ -120,7 +124,7 @@ class kb(object):
                         break
         return list_of_bindings_lists_result
 
-    #Complete infer function to infer new rules and facts and add them to KB
+    # Complete infer function to infer new rules and facts and add them to KB
     def kb_infer(self, cur_fact, cur_rule):
         bindings = match(cur_rule.LHS[0], cur_fact.statement)
         if bindings:
@@ -137,7 +141,7 @@ class kb(object):
                 cur_rule.rules_supported.append(new_rule)
                 self.add_rule(new_rule)
 
-    #Complete why function to backtrack back to the original facts and rules of a new fact or rule.
+    # Complete why function to backtrack back to the original facts and rules of a new fact or rule.
     def kb_why(self, statement):
         result_facts = []
         visited = set()
@@ -150,7 +154,7 @@ class kb(object):
                 self.dfs(result_facts, visited, result_fact, temp_f)
         return result_facts
 
-    #helper function for why function
+    # helper function for why function
     def dfs(self, result_facts, visited, result_fact, cur_fac_rule):
         for fac_rule in cur_fac_rule.supported_by:
             if fac_rule not in visited:
@@ -162,20 +166,23 @@ class kb(object):
         if len(result_fact) != 0:
             result_facts.append(copy.deepcopy(result_fact))
 
-#Match function to compare two statements and return a binding list if these two are matched
+
+# Match function to compare two statements and return a binding list if these two are matched
 def match(target, cur):
     if len(target) != len(cur) or target[0] != cur[0]:
         return False
     return match_args(target[1:], cur[1:])
 
-#use A statement and a list of bindings to Replace all of the variables with the constants they are bound to
+
+# use A statement and a list of bindings to Replace all of the variables with the constants they are bound to
 def instantiate(pattern, bindings):
     predicate = pattern[0]
     pattern = map(lambda x: bindings.get(x, x), pattern[1:])
     pattern.insert(0, predicate)
     return pattern
 
-#helper function of Match
+
+# helper function of Match
 def match_args(pattern_args, fact_args):
     bindings = {}
     for p, temp_f in zip(pattern_args, fact_args):
@@ -186,7 +193,8 @@ def match_args(pattern_args, fact_args):
             return False
     return bindings
 
-#helper function of Match
+
+# helper function of Match
 def match_element(p, temp_f, bindings):
     if varq(p):
         bound = bindings.get(p, False)
@@ -201,14 +209,16 @@ def match_element(p, temp_f, bindings):
     else:
         return False
 
-#To check if there if '?'
+
+# To check if there if '?'
 def varq(item):
     if item[0] == "?":
         return True
     else:
         return False
 
-#main function to test
+
+# main function to test
 if __name__ == "__main__":
 
     facts, rules = read.read_tokenize("statements.txt")
@@ -222,33 +232,33 @@ if __name__ == "__main__":
 
     original_KB = copy.deepcopy(kb1.facts)
 
-    #Test Guide:
-    #For each function, we call it under the print('*******function name*******')
-    #Run python main.py in terminal to test
-    #To modified test case, change the rules or facts in function parameters.
+    # Test Guide:
+    # For each function, we call it under the print('*******function name*******')
+    # Run python main.py in terminal to test
+    # To modified test case, change the rules or facts in function parameters.
 
 
     print ('\n*******************************  Knowledge Base  *********************************\n')
-    #display the original Knowledge Base
+    # display the original Knowledge Base
     for f in kb1.facts:
         print (f.count, f.statement)
 
     print ('\n*******************************  Rule Base  **************************************\n')
-    #display the original Rule Base
+    # display the original Rule Base
     for r in kb1.rules:
         print(r.count, r.LHS, "====>", r.RHS)
 
     print ('\n*******************************  Ask  *******************************************\n')
-    #display the result of Ask function
-    #Result is {'?x': 'block'}. Because we can find {'isa', 'pyramid', 'block'} in KB.
-    #To change the test case, change it directly in parameters below.
+    # display the result of Ask function
+    # Result is {'?x': 'block'}. Because we can find {'isa', 'pyramid', 'block'} in KB.
+    # To change the test case, change it directly in parameters below.
     print (kb1.kb_ask(['isa', 'pyramid', '?x']))
 
     print ('\n*******************************  Ask+  *******************************************\n')
-    #display the result of Ask+ function
-    #To change the test case, change it directly in parameters below.
+    # display the result of Ask+ function
+    # To change the test case, change it directly in parameters below.
 
-    #Result is 'No correct match !!!!!'. Because same variable will match two different facts.
+    # Result is 'No correct match !!!!!'. Because same variable will match two different facts.
     ll = [['isa', 'cube', '?x'], ['isa', 'pyramid', '?x']]
     result = kb1.kb_ask_plus(ll)
     if result:
@@ -256,7 +266,7 @@ if __name__ == "__main__":
     else:
         print("No correct match !!!!!!!")
 
-    #Result is [{'?x': 'block'}, {'?y': 'block'}]. Because we can find {'isa', 'pyramid', 'block'} in KB.
+    # Result is [{'?x': 'block'}, {'?y': 'block'}]. Because we can find {'isa', 'pyramid', 'block'} in KB.
     ll = [['isa', 'cube', '?x'], ['isa', 'pyramid', '?y']]
     result = kb1.kb_ask_plus(ll)
     if result:
@@ -264,34 +274,33 @@ if __name__ == "__main__":
     else:
         print("No correct match !!!!!!!")
 
-
     print ('\n*******************************  Match *******************************************\n')
-    #display the result of Match function
-    #To change the test case, change it directly in parameters below.
-    #Result is {'?x': 'block'} because if we want the binding to be true, x must be block
+    # display the result of Match function
+    # To change the test case, change it directly in parameters below.
+    # Result is {'?x': 'block'} because if we want the binding to be true, x must be block
     print (match(['isa', 'pyramid', '?x'], ['isa', 'pyramid', 'block']))
 
     print ('\n*******************************  Infer *******************************************\n')
-    #Execute Infer function
-    #To change the test case, change it directly in parameters below.
+    # Execute Infer function
+    # To change the test case, change it directly in parameters below.
     for fact in kb1.facts:
         for rule in kb1.rules:
             kb1.kb_infer(fact, rule)
 
     print ('\n**********************  Knowledge Base After Infer ********************************\n')
-    #display the result of KB after executing Infer function
+    # display the result of KB after executing Infer function
     for f in kb1.facts:
         print (f.count, f.statement)
 
     print ('\n**********************  Rule Base After Infer *************************************\n')
-    #display the result of Rule Base after executing Infer function
+    # display the result of Rule Base after executing Infer function
     for r in kb1.rules:
         print(r.count, r.LHS, "====>", r.RHS)
 
     print ('\n*******************************  Instantiate  ***************************************\n')
-    #Execute Instantiate function
-    #To change the test case, change it directly in parameters below.
-    #Result is ['size', 'pyramid4', 'blue'] because x is binded to blue.
+    # Execute Instantiate function
+    # To change the test case, change it directly in parameters below.
+    # Result is ['size', 'pyramid4', 'blue'] because x is binded to blue.
     sta = Statement(['size', 'pyramid4', '?x'])
     input_binding_list = [['?x', 'blue']]
 
@@ -302,10 +311,10 @@ if __name__ == "__main__":
     print(instantiate(sta.full, bindingList))
 
     print ('\n*******************************  Why **************************************\n')
-    #Execute Why function
-    #To change the test case, change it directly in parameters below.
-    #Result is [['inst', 'sphere1', 'sphere']], [[['inst', '?x', 'cube']]====>['flat', '?x']]
-    #Because ['flat', 'sphere1'] can be inferred from the result
+    # Execute Why function
+    # To change the test case, change it directly in parameters below.
+    # Result is [['inst', 'sphere1', 'sphere']], [[['inst', '?x', 'cube']]====>['flat', '?x']]
+    # Because ['flat', 'sphere1'] can be inferred from the result
     result = kb1.kb_why(Statement(['flat', 'sphere1']))
     for l in result:
         print(l)

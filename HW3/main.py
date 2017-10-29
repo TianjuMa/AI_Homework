@@ -1,6 +1,6 @@
 import copy
 
-from logic_interface import read
+import read
 
 
 class Statement(object):
@@ -98,6 +98,7 @@ class kb(object):
                 bindings = match(st, cur_fact.statement)
                 if bindings and not (bindings in list_of_bindings_lists_result):
                     list_of_bindings_lists_result.append(bindings)
+
         return list_of_bindings_lists_result
 
     def kb_infer(self, cur_fact, cur_rule):
@@ -201,10 +202,10 @@ if __name__ == "__main__":
     # print ('\n*******************************  Rule Base  **************************************\n')
     # for r in kb1.rules:
     #     print(r.count, r.LHS, "====>", r.RHS)
-
+    #
     # print ('\n*******************************  Ask  *******************************************\n')
     # print (kb1.kb_ask(['isa', 'pyramid', '?x']))
-    #
+
     # print ('\n*******************************  Match *******************************************\n')
     # print (match(['isa', 'pyramid', '?x'], ['isa', 'pyramid', 'block']))
     #
@@ -249,6 +250,7 @@ if __name__ == "__main__":
     print ('\n*******************************  Why **************************************\n')
 
     result = kb1.kb_why(Statement(['flat', 'pyramid1']))
+    print(result)
     for l in result:
         for fr in l:
             if type(fr) == Fact:

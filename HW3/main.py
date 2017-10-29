@@ -31,6 +31,9 @@ class Fact(object):
         self.facts_supported = []
         self.rules_supported = []
 
+    def __repr__(self):
+        return self.statement.__repr__()
+
 
 class Rule(object):
     count = 0
@@ -56,6 +59,9 @@ class Rule(object):
         self.supported_by = supported_by
         self.facts_supported = []
         self.rules_supported = []
+
+    def __repr__(self):
+        return self.LHS.__repr__() + "====>" + self.RHS.__repr__()
 
 
 class kb(object):
@@ -124,48 +130,27 @@ class kb(object):
                 cur_rule.rules_supported.append(new_rule)
                 self.add_rule(new_rule)
 
-    # def kb_why(self, statement):
-    #     result_facts = []
-    #     visited = set()
-    #     result_fact = []
-    #     for temp_f in self.facts:
-    #         if temp_f.statement == statement.full:
-    #             self.dfs(result_facts, visited, result_fact, temp_f)
-    #     return result_facts
-    #
-    # def dfs(self, result_facts, visited, result_fact, cur_fac_rule):
-    #     visited.add(cur_fac_rule)
-    #     result_fact.append(cur_fac_rule)
-    #     for fac_rule in cur_fac_rule.supported_by:
-    #         if fac_rule not in visited:
-    #             self.dfs(result_facts, visited, result_fact, fac_rule)
-    #     if len(result_fact) != 0:
-    #         result_facts.append(copy.deepcopy(result_fact))
-    #         result_fact.pop()
-    #     visited.remove(cur_fac_rule)
-
     def kb_why(self, statement):
-        res = []
-        print(res)
-        for fact in self.facts:
-            if fact.statement == statement.full:
-                res.append(fact)
-                return res
-            support = fact.facts_supported
-            for supFact in support:
-                res = self.dfs(statement, supFact, res)
-        return res
+        result_facts = []
+        visited = set()
+        result_fact = []
+        for temp_f in self.facts:
+            if temp_f.statement == statement.full:
+                visited.add(temp_f)
+                result_fact.append(temp_f)
+                self.dfs(result_facts, visited, result_fact, temp_f)
+        return result_facts
 
-    def dfs(self, statement, supFact, res):
-        if supFact.statement == statement.full:
-            res.append(supFact)
-            return res
-        if len(supFact.facts_supported) == 0:
-            return
-        for support in supFact.facts_supported:
-            res.append(support)
-            self.dfs(statement, support, res)
-            res.pop()
+    def dfs(self, result_facts, visited, result_fact, cur_fac_rule):
+        for fac_rule in cur_fac_rule.supported_by:
+            if fac_rule not in visited:
+                visited.add(fac_rule)
+                result_fact.append(fac_rule)
+                self.dfs(result_facts, visited, result_fact, fac_rule)
+                visited.remove(fac_rule)
+                result_fact.pop()
+        if len(result_fact) != 0:
+            result_facts.append(copy.deepcopy(result_fact))
 
 
 def match(target, cur):
@@ -277,28 +262,34 @@ if __name__ == "__main__":
 
     for fact in kb1.facts:
         for rule in kb1.rules:
-             kb1.kb_infer(fact, rule)
+            kb1.kb_infer(fact, rule)
     #
     print ('\n*******************************  Knowledge Base After update *********************************\n')
     for f in kb1.facts:
         print (f.count, f.statement)
-
-    print ('\n*******************************  Rule Base After update **************************************\n')
-    for r in kb1.rules:
-        print(r.count, r.LHS, "====>", r.RHS)
+    #
+    # print ('\n*******************************  Rule Base After update **************************************\n')
+    # for r in kb1.rules:
+    #     print(r.count, r.LHS, "====>", r.RHS)
 
     print ('\n*******************************  Why **************************************\n')
 
-    result = kb1.kb_why(Statement(['flat', 'pyramid1']))
-    # for l in result:
-    #     for fr in l:
-    #         if type(fr) == Fact:
-    #             print (fr.statement)
-    #         else:
-    #             print(fr.LHS, "====>", fr.RHS)
+    # for fa in kb1.facts:
+    #     if len(fa.supported_by) != 0:
+    #         print(fa.count)
 
-    # for f in kb1.facts:
-    #     print (f.statement, "supported by", map(lambda x: printHelper(x), f.supported_by))
+    result = kb1.kb_why(Statement(['flat', 'sphere1']))
+
+    for l in result:
+        print(l)
+        # for fr in l:
+        #     if type(fr) == Fact:
+        #         print (fr.statement)
+        #     else:
+        #         print(fr.LHS, "====>", fr.RHS)
+
+        # for f in kb1.facts:
+        #     print (f.statement, "supported by", map(lambda x: printHelper(x), f.supported_by))
 
 
 # def printHelper(fac_ru):

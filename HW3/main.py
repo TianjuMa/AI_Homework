@@ -2,6 +2,12 @@ import copy
 
 import read
 
+
+'''
+AI Assignment 3
+Team Members: Tianju Ma(tml5872) Menglei Lei(mlj3199)
+'''
+
 original_KB = []
 
 
@@ -109,16 +115,16 @@ class kb(object):
     # if the bindings are not consistent, then throw exceptions
     def kb_ask_plus(self, statement_list):
         list_of_bindings_lists_result = []
-        all_match = set()
+        all_match = {}
         for st in statement_list:
             for cur_fact in self.facts:
                 bindings = match(st, cur_fact.statement)
                 if bindings:
                     for b in bindings.keys():
-                        if b in all_match:
+                        if b in all_match and all_match[b] != bindings.get(b):
                             return False
                         else:
-                            all_match.add(b)
+                            all_match[b] = bindings.get(b)
                     if len(bindings) != 0:
                         list_of_bindings_lists_result.append(bindings)
                         break

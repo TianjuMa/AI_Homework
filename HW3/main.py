@@ -109,19 +109,20 @@ class kb(object):
     #if the bindings are not consistent, then throw exceptions
     def kb_ask_plus(self, statement_list):
         list_of_bindings_lists_result = []
-        all_match = set()
+        all_match = {}
         for st in statement_list:
             for cur_fact in self.facts:
                 bindings = match(st, cur_fact.statement)
                 if bindings:
                     for b in bindings.keys():
-                        if b in all_match:
+                        if b in all_match and all_match[b] != bindings.get(b):
                             return False
                         else:
-                            all_match.add(b)
+                            all_match[b] = bindings.get(b)
                     if len(bindings) != 0:
-                        list_of_bindings_lists_result.append(bindings)
-                        break
+                        if bindings not in list_of_bindings_lists_result:
+                            list_of_bindings_lists_result.append(bindings)
+                            break
         return list_of_bindings_lists_result
 
     #Complete infer function to infer new rules and facts and add them to KB

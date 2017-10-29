@@ -2,6 +2,10 @@ import copy
 
 import read
 
+'''
+AI Assignment 3
+Team Members: Tianju Ma(tml5872) Menglei Lei(mlj3199)
+'''
 
 original_KB = []
 #define Statement object for convenient use

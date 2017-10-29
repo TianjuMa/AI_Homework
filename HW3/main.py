@@ -280,15 +280,15 @@ if __name__ == "__main__":
     print ('\n*******************************  Why **************************************\n')
 
     result = kb1.kb_why(Statement(['flat', 'pyramid1']))
-    print(result)
-    for l in result:
-        for fr in l:
-            if type(fr) == Fact:
-                print (fr.statement)
-            else:
-                print(fr.LHS, "====>", fr.RHS)
-
-    result = kb1.kb_why(Statement(['flat', 'sphere1']))
+    # print(result)
+    # for l in result:
+    #     for fr in l:
+    #         if type(fr) == Fact:
+    #             print (fr.statement)
+    #         else:
+    #             print(fr.LHS, "====>", fr.RHS)
+    #
+    # result = kb1.kb_why(Statement(['flat', 'sphere1']))
 
     for l in result:
         print(l)

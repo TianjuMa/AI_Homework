@@ -2,13 +2,37 @@ import copy
 
 import read
 
-
 '''
 AI Assignment 3
 Team Members: Tianju Ma(tml5872) Menglei Lei(mlj3199)
 '''
 
 original_KB = []
+
+
+class Action(object):
+    def __init__(self, cur_type, statement):
+        self.type = cur_type
+        self.preconditions = []
+        self.add = []
+        self.retract = []
+        self.kb = kb()
+        self.statement = statement
+        self.act_ask()
+        self.act_assert()
+        self.act_retract()
+
+    def act_assert(self):
+        if self.type == "assert":
+            self.kb.kb_assert(self.statement)
+
+    def act_ask(self):
+        if self.type == "ask":
+            self.kb.kb_ask(self.statement)
+
+    def act_retract(self):
+        if self.type == "retract":
+            self.kb.kb_retract(self.statement)
 
 
 # define Statement object for convenient use
@@ -96,9 +120,12 @@ class kb(object):
     # Complete assert function which allows to add fact and rule into KB
     def kb_assert(self, statement):
         if type(statement) == list:
-            self.add_fact(Fact(statement))
+            my_fact = Fact(statement)
+            self.add_fact(my_fact)
+            self.infer_from_fact(my_fact)
         else:
-            self.add_rule(Rule(statement))
+            temp_r = Rule(statement)
+            self.add_rule(temp_r)
 
     # Complete Ask function to see if the statement is existing in KB
     def kb_ask(self, statement):
@@ -160,6 +187,9 @@ class kb(object):
                 self.dfs(result_facts, visited, result_fact, temp_f)
         return result_facts
 
+    def kb_retract(self, statement):
+        return
+
     # helper function for why function
     def dfs(self, result_facts, visited, result_fact, cur_fac_rule):
         for fac_rule in cur_fac_rule.supported_by:
@@ -171,6 +201,10 @@ class kb(object):
                 result_fact.pop()
         if len(result_fact) != 0:
             result_facts.append(copy.deepcopy(result_fact))
+
+    def infer_from_fact(self, cur_fact):
+        for temp_r in self.rules:
+            self.kb_infer(cur_fact, temp_r)
 
 
 # Match function to compare two statements and return a binding list if these two are matched
@@ -243,7 +277,6 @@ if __name__ == "__main__":
     # Run python main.py in terminal to test
     # To modified test case, change the rules or facts in function parameters.
 
-
     print ('\n*******************************  Knowledge Base  *********************************\n')
     # display the original Knowledge Base
     for f in kb1.facts:
@@ -286,7 +319,7 @@ if __name__ == "__main__":
     # Result is {'?x': 'block'} because if we want the binding to be true, x must be block
     print (match(['isa', 'pyramid', '?x'], ['isa', 'pyramid', 'block']))
 
-    print ('\n*******************************  Infer *******************************************\n')
+    print ('\n*******************************  Infer  *******************************************\n')
     # Execute Infer function
     # To change the test case, change it directly in parameters below.
     for fact in kb1.facts:

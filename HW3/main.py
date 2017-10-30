@@ -11,28 +11,49 @@ original_KB = []
 
 
 class Action(object):
-    def __init__(self, cur_type, statement):
-        self.type = cur_type
+    def __init__(self, statement, KB_ref):
         self.preconditions = []
         self.add = []
         self.retract = []
-        self.kb = kb()
         self.statement = statement
+        self.kb = copy.deepcopy(KB_ref)
+        self.original_KB_ref = KB_ref
         self.act_ask()
         self.act_assert()
         self.act_retract()
 
     def act_assert(self):
-        if self.type == "assert":
-            self.kb.kb_assert(self.statement)
+        self.kb_assert()
 
     def act_ask(self):
-        if self.type == "ask":
-            self.kb.kb_ask(self.statement)
+        for ff in self.original_KB_ref.facts:
+            for fff in ff.supported_by:
+                if type(fff) == Fact and self.statement == fff.statement:
+                    self.preconditions.append(ff)
 
     def act_retract(self):
-        if self.type == "retract":
-            self.kb.kb_retract(self.statement)
+        trace = self.kb.kb_why(Statement(self.statement))
+        for fa_ru in trace:
+            if type(fa_ru) == Fact and fa_ru.statement != self.statement:
+                self.retract.append(fa_ru)
+
+    def kb_assert(self):
+        if type(self.statement) == list:
+            my_fact = Fact(self.statement)
+            self.kb.add_fact(my_fact)
+            self.kb.infer_from_fact(my_fact)
+        else:
+            temp_r = Rule(self.statement)
+            self.kb.add_rule(temp_r)
+
+        for fac in self.kb.facts:
+            flag = False
+            for ffff in self.original_KB_ref.facts:
+                if fac.statement == ffff.statement:
+                    flag = True
+                    break
+            if not flag:
+                self.add.append(fac)
 
 
 # define Statement object for convenient use
@@ -120,12 +141,16 @@ class kb(object):
     # Complete assert function which allows to add fact and rule into KB
     def kb_assert(self, statement):
         if type(statement) == list:
+            for fa in self.facts:
+                if fa.statement == statement:
+                    return
             my_fact = Fact(statement)
             self.add_fact(my_fact)
             self.infer_from_fact(my_fact)
         else:
             temp_r = Rule(statement)
             self.add_rule(temp_r)
+            self.infer_from_rule(temp_r)
 
     # Complete Ask function to see if the statement is existing in KB
     def kb_ask(self, statement):
@@ -167,6 +192,7 @@ class kb(object):
                 cur_fact.facts_supported.append(new_fact)
                 cur_rule.rules_supported.append(new_fact)
                 self.add_fact(new_fact)
+                self.kb_assert(new_fact.statement)
             else:
                 lhs = map(lambda x: instantiate(x, bindings), cur_rule.LHS[1:])
                 rhs = instantiate(cur_rule.RHS, bindings)
@@ -174,6 +200,7 @@ class kb(object):
                 cur_fact.facts_supported.append(new_rule)
                 cur_rule.rules_supported.append(new_rule)
                 self.add_rule(new_rule)
+                # self.kb_assert(new_rule)
 
     # Complete why function to backtrack back to the original facts and rules of a new fact or rule.
     def kb_why(self, statement):
@@ -187,9 +214,6 @@ class kb(object):
                     result_fact.append(temp_f)
                 self.dfs(result_facts, visited, result_fact, temp_f)
         return result_facts
-
-    def kb_retract(self, statement):
-        return
 
     # helper function for why function
     def dfs(self, result_facts, visited, result_fact, cur_fac_rule):
@@ -206,6 +230,10 @@ class kb(object):
     def infer_from_fact(self, cur_fact):
         for temp_r in self.rules:
             self.kb_infer(cur_fact, temp_r)
+
+    def infer_from_rule(self, cur_rule):
+        for temp_f in self.facts:
+            self.kb_infer(temp_f, cur_rule)
 
 
 # Match function to compare two statements and return a binding list if these two are matched
@@ -265,11 +293,22 @@ if __name__ == "__main__":
     facts, rules = read.read_tokenize("statements.txt")
 
     kb1 = kb()
-    for fact in facts:
-        kb1.kb_assert(fact)
 
     for rule in rules:
         kb1.kb_assert(rule)
+
+    # test Action class
+    for fact in facts:
+        if fact == ['inst', 'cube4', 'cube']:
+            print ('\n*******************************  Action  *********************************\n')
+            ac = Action(fact, kb1)
+            print(ac.preconditions)
+            print(ac.add)
+            print(ac.retract)
+        kb1.kb_assert(fact)
+
+    # for fact in facts:
+    #     kb1.add_fact(Fact(fact))
 
     original_KB = copy.deepcopy(kb1.facts)
 
@@ -319,23 +358,6 @@ if __name__ == "__main__":
     # To change the test case, change it directly in parameters below.
     # Result is {'?x': 'block'} because if we want the binding to be true, x must be block
     print (match(['isa', 'pyramid', '?x'], ['isa', 'pyramid', 'block']))
-
-    print ('\n*******************************  Infer  *******************************************\n')
-    # Execute Infer function
-    # To change the test case, change it directly in parameters below.
-    for fact in kb1.facts:
-        for rule in kb1.rules:
-            kb1.kb_infer(fact, rule)
-
-    print ('\n**********************  Knowledge Base After Infer ********************************\n')
-    # display the result of KB after executing Infer function
-    for f in kb1.facts:
-        print (f.count, f.statement)
-
-    print ('\n**********************  Rule Base After Infer *************************************\n')
-    # display the result of Rule Base after executing Infer function
-    for r in kb1.rules:
-        print(r.count, r.LHS, "====>", r.RHS)
 
     print ('\n*******************************  Instantiate  ***************************************\n')
     # Execute Instantiate function

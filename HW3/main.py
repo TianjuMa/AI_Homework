@@ -153,8 +153,9 @@ class kb(object):
                         else:
                             all_match[b] = bindings.get(b)
                     if len(bindings) != 0:
-                        list_of_bindings_lists_result.append(bindings)
-                        break
+                        if bindings not in list_of_bindings_lists_result:
+                            list_of_bindings_lists_result.append(bindings)
+                            break
         return list_of_bindings_lists_result
 
     # Complete infer function to infer new rules and facts and add them to KB

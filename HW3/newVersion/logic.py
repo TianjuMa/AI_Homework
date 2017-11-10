@@ -83,7 +83,9 @@ class Fact(object):
 class Rule(object):
     def __init__(self, lhs, rhs):
         self.full = lhs + rhs
-        self.lhs = map(lambda x: Fact(x), lhs)
+        self.lhs = []
+        for x in lhs:
+            self.lhs.append(Fact(x))
         self.rhs = Fact(rhs)
         self.facts = []
         self.rules = []
@@ -196,7 +198,9 @@ class KB(object):
                             for key in ins[1]:
                                 bindings[key] = ins[1][key]
                             bd_list.append(bindings)
-        L = map(lambda x : len(x), bd_list)
+        L = []
+        for x in bd_list:
+            L.append(len(x))
         result = [item for item in bd_list if len(item) == max(L)]
         f = lambda x,y : x if y in x else x + [y]
         result = reduce(f, [[], ] + result)
@@ -207,7 +211,9 @@ class KB(object):
         path = []
         rule = []
         infer_KB_pretty = []
-        original_facts_pretty = map(lambda x : Fact(x).output(), original_facts)
+        original_facts_pretty = []
+        for x in original_facts:
+            original_facts_pretty.append(Fact(x).output())
         for r in self.RB:
             bd = match(r.rhs, fact)
             if bd != False:

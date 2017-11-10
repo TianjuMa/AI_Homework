@@ -1,0 +1,184 @@
+=================== Loading in the data ===================
+
+=================== Setting up the Knowledge Base ===================
+
+=================== Testing KB_Assert ===================
+['inst', 'bigbox', 'box']
+['size', 'bigbox', 'big']
+['color', 'bigbox', 'red']
+['inst', 'littlebox', 'box']
+['size', 'littlebox', 'small']
+['color', 'littlebox', 'blue']
+['inst', 'pyramid1', 'pyramid']
+['size', 'pyramid1', 'small']
+['color', 'pyramid1', 'blue']
+['inst', 'pyramid2', 'pyramid']
+['size', 'pyramid2', 'small']
+['color', 'pyramid2', 'green']
+['inst', 'pyramid3', 'pyramid']
+['size', 'pyramid3', 'small']
+['color', 'pyramid3', 'green']
+['fits', 'littlebox', 'bigbox']
+['fits', 'pyramid1', 'bigbox']
+['fits', 'pyramid2', 'bigbox']
+['fits', 'pyramid3', 'bigbox']
+['contrasting', 'bigbox', 'pyramid2']
+['contrasting', 'bigbox', 'pyramid3']
+[['size', '?x', 'small'], ['size', '?y', 'big'], ['inst', '?y', 'box'], 'fits', '?x', '?y']
+[['size', '?y', 'big'], ['inst', '?y', 'box'], 'fits', 'littlebox', '?y']
+[['inst', 'bigbox', 'box'], 'fits', 'littlebox', 'bigbox']
+[['size', '?y', 'big'], ['inst', '?y', 'box'], 'fits', 'pyramid1', '?y']
+[['inst', 'bigbox', 'box'], 'fits', 'pyramid1', 'bigbox']
+[['size', '?y', 'big'], ['inst', '?y', 'box'], 'fits', 'pyramid2', '?y']
+[['inst', 'bigbox', 'box'], 'fits', 'pyramid2', 'bigbox']
+[['size', '?y', 'big'], ['inst', '?y', 'box'], 'fits', 'pyramid3', '?y']
+[['inst', 'bigbox', 'box'], 'fits', 'pyramid3', 'bigbox']
+[['color', '?x', 'red'], ['color', '?y', 'green'], 'contrasting', '?x', '?y']
+[['color', '?y', 'green'], 'contrasting', 'bigbox', '?y']
+
+=================== Testing KB_ask ===================
+
+Asking : ['inst', '?x', 'box']
+{'?x': 'bigbox'}
+{'?x': 'littlebox'}
+
+Asking : ['size', '?x', 'big']
+{'?x': 'bigbox'}
+
+Asking : ['color', '?x', 'red']
+{'?x': 'bigbox'}
+
+Asking : ['inst', 'littlebox', '?x']
+{'?x': 'box'}
+
+Asking : ['size', 'littlebox', '?x']
+{'?x': 'small'}
+
+Asking : ['color', 'littlebox', '?x']
+{'?x': 'blue'}
+
+Asking : ['inst', '?x', 'pyramid']
+{'?x': 'pyramid1'}
+{'?x': 'pyramid2'}
+{'?x': 'pyramid3'}
+
+=================== Testing KB_ask and instantiate ===================
+
+Asking : ['inst', '?x', 'box']
+Found:
+['inst', 'bigbox', 'box']
+['inst', 'littlebox', 'box']
+
+Asking : ['size', '?x', 'big']
+Found:
+['size', 'bigbox', 'big']
+
+Asking : ['color', '?x', 'red']
+Found:
+['color', 'bigbox', 'red']
+
+Asking : ['inst', 'littlebox', '?x']
+Found:
+['inst', 'littlebox', 'box']
+
+Asking : ['size', 'littlebox', '?x']
+Found:
+['size', 'littlebox', 'small']
+
+Asking : ['color', 'littlebox', '?x']
+Found:
+['color', 'littlebox', 'blue']
+
+Asking : ['inst', '?x', 'pyramid']
+Found:
+['inst', 'pyramid1', 'pyramid']
+['inst', 'pyramid2', 'pyramid']
+['inst', 'pyramid3', 'pyramid']
+
+=================== Testing retract ===================
+Retract: (color bigbox red)
+Retract: (contrasting bigbox pyramid2)
+Retract: (contrasting bigbox pyramid3)
+Retract: (color ?y green)> -> (contrasting bigbox ?y)
+Retract: (size bigbox big)
+Retract: (fits littlebox bigbox)
+Retract: (inst bigbox box)> -> (fits littlebox bigbox)
+Retract: (fits pyramid1 bigbox)
+Retract: (inst bigbox box)> -> (fits pyramid1 bigbox)
+Retract: (fits pyramid2 bigbox)
+Retract: (inst bigbox box)> -> (fits pyramid2 bigbox)
+Retract: (fits pyramid3 bigbox)
+Retract: (inst bigbox box)> -> (fits pyramid3 bigbox)
+
+=================== Asserting what we just retracted ===================
+
+=================== Testing against Why ===================
+['inst', 'bigbox', 'box']
+['inst', 'littlebox', 'box']
+['size', 'littlebox', 'small']
+['color', 'littlebox', 'blue']
+['inst', 'pyramid1', 'pyramid']
+['size', 'pyramid1', 'small']
+['color', 'pyramid1', 'blue']
+['inst', 'pyramid2', 'pyramid']
+['size', 'pyramid2', 'small']
+['color', 'pyramid2', 'green']
+['inst', 'pyramid3', 'pyramid']
+['size', 'pyramid3', 'small']
+['color', 'pyramid3', 'green']
+['color', 'bigbox', 'red']
+['(color bigbox red)', '(color pyramid2 green)', '(color ?y green)> -> (contrasting bigbox ?y)', '(color ?x red) (color ?y green)> -> (contrasting ?x ?y)']
+['(color pyramid3 green)', '(color bigbox red)', '(color ?y green)> -> (contrasting bigbox ?y)', '(color ?x red) (color ?y green)> -> (contrasting ?x ?y)']
+['size', 'bigbox', 'big']
+['(size littlebox small)', '(size bigbox big)', '(inst bigbox box)', '(size ?x small) (size ?y big) (inst ?y box)> -> (fits ?x ?y)', '(inst bigbox box)> -> (fits littlebox bigbox)', '(size ?y big) (inst ?y box)> -> (fits littlebox ?y)']
+['(size bigbox big)', '(inst bigbox box)', '(size pyramid1 small)', '(inst bigbox box)> -> (fits pyramid1 bigbox)', '(size ?x small) (size ?y big) (inst ?y box)> -> (fits ?x ?y)', '(size ?y big) (inst ?y box)> -> (fits pyramid1 ?y)']
+['(size pyramid2 small)', '(size bigbox big)', '(inst bigbox box)', '(size ?y big) (inst ?y box)> -> (fits pyramid2 ?y)', '(size ?x small) (size ?y big) (inst ?y box)> -> (fits ?x ?y)', '(inst bigbox box)> -> (fits pyramid2 bigbox)']
+['(size pyramid3 small)', '(size bigbox big)', '(inst bigbox box)', '(size ?x small) (size ?y big) (inst ?y box)> -> (fits ?x ?y)', '(size ?y big) (inst ?y box)> -> (fits pyramid3 ?y)', '(inst bigbox box)> -> (fits pyramid3 bigbox)']
+
+=================== Testing against Ask PLus ===================
+
+Asking about: [['color', '?y', 'red'], ['color', '?x', 'green']]
+Found 2 sets of bindings
+
+	Binding: {'?y': 'bigbox', '?x': 'pyramid2'}
+	Facts:
+['color', 'bigbox', 'red']
+['color', 'pyramid2', 'green']
+
+	Binding: {'?y': 'bigbox', '?x': 'pyramid3'}
+	Facts:
+['color', 'bigbox', 'red']
+['color', 'pyramid3', 'green']
+
+Asking about: [['color', '?y', '?x'], ['inst', '?y', 'box'], ['size', '?y', '?z']]
+Found 5 sets of bindings
+
+	Binding: {'?z': 'small', '?y': 'littlebox', '?x': 'blue'}
+	Facts:
+['color', 'littlebox', 'blue']
+['inst', 'littlebox', 'box']
+['size', 'littlebox', 'small']
+
+	Binding: {'?z': 'small', '?y': 'pyramid1', '?x': 'blue'}
+	Facts:
+['color', 'pyramid1', 'blue']
+['inst', 'pyramid1', 'box']
+['size', 'pyramid1', 'small']
+
+	Binding: {'?z': 'small', '?y': 'pyramid2', '?x': 'green'}
+	Facts:
+['color', 'pyramid2', 'green']
+['inst', 'pyramid2', 'box']
+['size', 'pyramid2', 'small']
+
+	Binding: {'?z': 'small', '?y': 'pyramid3', '?x': 'green'}
+	Facts:
+['color', 'pyramid3', 'green']
+['inst', 'pyramid3', 'box']
+['size', 'pyramid3', 'small']
+
+	Binding: {'?z': 'big', '?y': 'bigbox', '?x': 'red'}
+	Facts:
+['color', 'bigbox', 'red']
+['inst', 'bigbox', 'box']
+['size', 'bigbox', 'big']

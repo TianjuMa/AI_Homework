@@ -1,5 +1,4 @@
 import copy
-
 import read
 
 '''
@@ -153,15 +152,26 @@ class kb(object):
             self.infer_from_rule(temp_r)
 
     # Complete Ask function to see if the statement is existing in KB
-    def kb_ask(self, statement):
-        bindings = {}
+    # def kb_ask(self, statement):
+    #     bindings = {}
+    #     for cur_fact in self.facts:
+    #         bindings = match(statement, cur_fact.statement)
+    #         if bindings:
+    #             break
+    #     if len(bindings) == 0:
+    #         return 'No matching solutions \n'
+    #     return bindings
+
+    def kb_ask(self, stat):
+        bd = {}
+        bd_list = []
         for cur_fact in self.facts:
-            bindings = match(statement, cur_fact.statement)
-            if bindings:
-                break
-        if len(bindings) == 0:
-            return 'No matching solutions \n'
-        return bindings
+            bd = match(stat, cur_fact.statement)
+            if bd and bd not in bd_list:
+                bd_list.append(bd)
+        if len(bd_list) == 0:
+            return "Not match"
+        return bd_list
 
     # Complete ask + function to see a list of statments is existing in KB
     # if the bindings are not consistent, then throw exceptions
